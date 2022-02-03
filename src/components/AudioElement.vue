@@ -346,6 +346,7 @@ export default {
         let continueTime = response.data[0].play_time
 
         if (continueTime == 0) return
+        if (this.player.duration <= continueTime) return
   
         this.player.currentTime = continueTime;
 
