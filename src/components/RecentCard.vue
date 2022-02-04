@@ -1,7 +1,7 @@
 <template>
   <q-card>
     <router-link :to="`/work/${metadata.work_id}`">
-      <CoverSFW :workid="metadata.work_id" :nsfw="false" :release="'上次播放时间: ' + metadata.updated_at" style="max-width:200px;"/>
+      <CoverSFW :workid="metadata.work_id" :nsfw="false" :release="'上次播放到: ' + this.formatSeconds(metadata.play_time)" style="max-width:200px;"/>
     </router-link>
 
     <q-separator />
@@ -97,7 +97,25 @@ export default {
   methods: {
     onClickPlay () {
 
-    }
+    },
+
+    formatSeconds (seconds) {
+          let h = Math.floor(seconds / 3600) < 10
+            ? '0' + Math.floor(seconds / 3600)
+            : Math.floor(seconds / 3600)
+
+          let m = Math.floor((seconds / 60 % 60)) < 10
+            ? '0' + Math.floor((seconds / 60 % 60))
+            : Math.floor((seconds / 60 % 60))
+
+          let s = Math.floor((seconds % 60)) < 10
+            ? '0' + Math.floor((seconds % 60))
+            : Math.floor((seconds % 60))
+
+          return h === "00"
+            ? m + ":" + s
+            : h + ":" + m + ":" + s
+        }
   }
 }
 </script>
