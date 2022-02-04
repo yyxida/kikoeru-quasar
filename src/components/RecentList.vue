@@ -2,21 +2,17 @@
   <div>
     <div class="text-h5 text-weight-regular q-ma-md">
       {{pageTitle}}
-      <span v-show="pagination.totalCount">
-        ({{pagination.totalCount}})
-      </span>
     </div>
 
-    <div :class="`row justify-center ${listMode ? 'list' : 'q-mx-md'}`">
+    <div :class="`row justify-center q-mx-md`">
       <q-infinite-scroll @load="onLoad" :offset="250" :disable="stopLoad" style="max-width: 1680px;" class="col">
 
-
-        <div class="row q-col-gutter-x-md q-col-gutter-y-lg">
-          <div class="col-xs-12 col-sm-6 col-md-4" :class="detailMode ? 'col-lg-3 col-xl-3': 'col-lg-2 col-xl-2'" v-for="recentwork in recentworks" :key="recentwork.id">
+        <div class="row q-col-gutter-x-md q-col-gutter-y-lg" style="white-space: nowrap; flex-wrap: nowrap; overflow-x: scroll; max-width: 100%">
+          <div class="col-xs-12 col-sm-6 col-md-4" :class="detailMode ? 'col-lg-3 col-xl-3': 'col-lg-2 col-xl-2'" v-for="recentwork in recentworks" :key="recentwork.id"  style="display: inline-block">
             <RecentCard :metadata="recentwork" :thumbnailMode="!detailMode" class="fit"/>
           </div>
         </div>
-        
+
         <template v-slot:loading>
           <div class="row justify-center q-my-md">
             <q-spinner-dots color="primary" size="40px" />
@@ -48,8 +44,6 @@ export default {
       stopLoad: false,
       recentworks: [],
       pageTitle: '',
-      page: 1,
-      pagination: { currentPage:0, pageSize:12, totalCount:0 },
       seed: 7, // random sort
       sortOption: {
         label: '按照发售日期新到老的顺序',
