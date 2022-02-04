@@ -1,5 +1,8 @@
 <template>
   <div>
+    <RecentList />
+
+
     <div class="text-h5 text-weight-regular q-ma-md">
       {{pageTitle}}
       <span v-show="pagination.totalCount">
@@ -104,6 +107,7 @@
 import WorkCard from 'components/WorkCard'
 import WorkListItem from 'components/WorkListItem'
 import NotifyMixin from '../mixins/Notification.js'
+import RecentList from 'components/RecentList'
 
 export default {
   name: 'Works',
@@ -112,7 +116,8 @@ export default {
 
   components: {
     WorkCard,
-    WorkListItem
+    WorkListItem,
+    RecentList
   },
 
   data () {
