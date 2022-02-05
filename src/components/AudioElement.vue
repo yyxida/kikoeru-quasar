@@ -204,6 +204,7 @@ export default {
 
     onEnded () {
       console.log("onEnded")
+      this.dontResume = true
       // 当前文件播放结束时触发
       switch (this.playMode.name) {
         case "all repeat":
@@ -323,6 +324,11 @@ export default {
     },
 
     resumePlayHistory() {
+      if (this.dontResume) {
+        this.dontResume = false
+        return
+      }
+
       const workID = this.currentPlayingFile.hash.split('/')[0]
       const fileIndex = this.currentPlayingFile.hash.split('/')[1]
 
@@ -341,9 +347,10 @@ export default {
         }
 
         let continueTime = response.data[0].play_time
+        let totalTime = response.data[0].total_time
 
         if (continueTime == 0) return
-        if (this.player.duration <= continueTime) return
+        if (totalTime <= continueTime) return
   
         this.player.currentTime = parseInt(continueTime);
 
