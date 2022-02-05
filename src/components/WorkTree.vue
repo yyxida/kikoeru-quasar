@@ -149,6 +149,9 @@ export default {
       } else if (item.type === 'other') {
         this.download(item);
       } else if (this.currentPlayingFile.hash !== item.hash) {
+        console.log(this.queue)
+        console.log(this.queue.concat())
+        console.log(this.queue.findIndex(file => file.hash === item.hash))
         this.$store.commit('AudioPlayer/SET_QUEUE', {
           queue: this.queue.concat(),
           index: this.queue.findIndex(file => file.hash === item.hash),

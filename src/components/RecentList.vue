@@ -5,21 +5,22 @@
     </div>
 
     <div :class="`row justify-center q-mx-md`">
-      <q-infinite-scroll @load="onLoad" :offset="250" :disable="stopLoad" style="max-width: 1680px;" class="col">
+      <q-infinite-scroll @load="onLoad" :offset="250" :disable="stopLoad" style="max-width: 1680px; overflow-x: scroll; padding: 25px 35px 25px 35px; margin-left: -15px;" class="col">
 
-        <div class="row q-col-gutter-x-md q-col-gutter-y-lg" style="white-space: nowrap; flex-wrap: nowrap; overflow-x: scroll; max-width: 100%">
-          <div class="col-xs-12 col-sm-6 col-md-4" :class="detailMode ? 'col-lg-3 col-xl-3': 'col-lg-2 col-xl-2'" v-for="recentwork in recentworks" :key="recentwork.id"  style="display: inline-block">
+        <div class="row q-col-gutter-x-md q-col-gutter-y-lg" style="white-space: nowrap; flex-wrap: nowrap; overflow-x: visible; overflow-y: visible; max-width: 100%">
+          <div class="" v-for="recentwork in recentworks" :key="recentwork.id"  style="display: inline-block">
             <RecentCard :metadata="recentwork" :thumbnailMode="!detailMode" class="fit"/>
           </div>
+
+
         </div>
 
-        <template v-slot:loading>
-          <div class="row justify-center q-my-md">
-            <q-spinner-dots color="primary" size="40px" />
-          </div>
-        </template>
       </q-infinite-scroll>
     </div>
+
+    <!-- <div class="btn-right">
+      <span style="display: inline; padding: 10px"> > </span>
+    </div> -->
   </div>
 </template>
 
@@ -160,6 +161,7 @@ export default {
   // <keep-alive /> is set in MainLayout
   activated () {
     this.stopLoad = false
+    this.requestRecentWorks()
   },
 
   deactivated () {
@@ -193,7 +195,6 @@ export default {
   methods: {
     onLoad () {
       this.requestRecentWorks()
-      
     },
 
     requestRecentWorks () {
@@ -242,5 +243,15 @@ export default {
     @media (min-width: $breakpoint-md-min) {
       width: 560px;
     }
+  }
+
+  .btn-right {
+    float: right; 
+    font-size:32px; 
+    position: relative; 
+    top: -75px; 
+    background: rgba(71, 71, 71, 0.548);
+    cursor: hand;
+    z-index: 1000;
   }
 </style>

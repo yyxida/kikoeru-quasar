@@ -1,29 +1,42 @@
 <template>
-  <q-card>
-    <router-link :to="`/work/${metadata.work_id}`">
-      <CoverSFW :workid="metadata.work_id" :nsfw="false" :release="'上次播放到: ' + this.formatSeconds(metadata.play_time)" style="max-width:200px;"/>
-    </router-link>
-
-    <q-separator />
-
-    <div v-if="!thumbnailMode">
-      <!-- 标题 -->
-      <div class="q-mx-sm text-h6 text-weight-regular ellipsis-2-lines">
-        <router-link :to="`/work/${metadata.work_id}`" class="text-black">
-          {{ metadata.title }}
-        </router-link>
+  <div >
+    <!-- <router-link :to="`/work/${metadata.work_id}`"> -->
+    <q-img
+      :src="coverUrl"
+      :ratio="4/3"
+      :img-class="imgClass"
+      style="max-width: 560px;"
+      transition="fade"
+      @mouseover="''"
+      @mouseout="''"
+      @click="onClickPlay()"
+      class="square"
+    >
+      <div class="absolute-top-left transparent" style="padding: 0;">
+        <q-chip dense square color="brown" text-color="white" class="q-ma-sm">
+          {{`RJ${metadata.work_id}`}}
+        </q-chip>
       </div>
-    </div>
 
-    <div>
-      <p>{{metadata.file_name}}</p>
+      <div class="absolute-bottom-right" style="padding: 5px;">
+        {{'上次播放到: ' + this.formatSeconds(metadata.play_time)}}
+      </div>
+
+      <div class="text">
+        {{metadata.file_name}}
+      </div>
+    </q-img>
+    <!-- </router-link> -->
+    <div class="underline-text">
+      <span class="mover-1">
+        {{metadata.file_name}}
+      </span>
     </div>
-  </q-card>
+  </div>
 </template>
 
 <script>
 // import WorkDetails from 'components/WorkDetails'
-import CoverSFW from 'components/CoverSFW'
 import NotifyMixin from '../mixins/Notification.js'
 
 export default {
@@ -32,7 +45,6 @@ export default {
   mixins: [NotifyMixin],
 
   components: {
-    CoverSFW
   },
 
   props: {
@@ -61,7 +73,32 @@ export default {
       }
 
       return this.metadata.rate_count_detail.slice().sort(compare);
-    }
+    },
+
+      imgClass () {
+      if (this.$q.platform.is.mobile) {
+        // 在移动设备上图片直接显示
+        return ""
+      } else {
+        if (!this.nsfw) {
+          // 在PC上SFW的图片直接显示
+          return ""
+        } else {
+          // 在PC上NSFW的图片鼠标悬停显示
+          return this.blurFlag ? "blur-image" : ""
+        }
+      }
+    },
+
+    coverUrl () {
+      // 从 LocalStorage 中读取 token
+      const token = this.$q.localStorage.getItem('jwt-token') || ''
+      return this.metadata.work_id ? `/api/cover/${this.metadata.work_id}?token=${token}` : ""
+    },
+
+    rjcode () {
+      return (`000000${this.metadata.work_id}`).slice(-6)
+    },
   },
 
   // TODO: Refactor with Vuex?
@@ -96,7 +133,43 @@ export default {
 
   methods: {
     onClickPlay () {
+      // 获取playlist
+      this.$axios.get(`/api/tracks/${this.metadata.work_id}`)
+      .then(response => {
+        this.tree = response.data
+        let queue = []
+        for (let i=0; i<this.tree.length; i+=1) {
+          if (this.tree[i].children != null) {
+            queue = queue.concat(this.tree[i].children)
+          } else {
+            queue.push(this.tree[i])
+          }
+        }
 
+        // 插入playlist
+        let hash = this.metadata.work_id + '/' + this.metadata.file_index
+
+        console.log(queue)
+        console.log(queue.concat())
+        console.log(hash)
+        console.log(queue.findIndex(file => file.hash === hash))
+
+        this.$store.commit('AudioPlayer/SET_QUEUE', {
+        queue: queue.concat(),
+        index: queue.findIndex(file => file.hash === hash),
+        resetPlaying: true
+        // 开始播放
+        })
+      })
+      .catch((error) => {
+        if (error.response) {
+          // 请求已发出，但服务器响应的状态码不在 2xx 范围内
+          this.showErrNotif(error.response.data.error || `${error.response.status} ${error.response.statusText}`)
+        } else {
+          this.showErrNotif(error.message || error)
+        }
+      })
+  
     },
 
     formatSeconds (seconds) {
@@ -116,6 +189,77 @@ export default {
             ? m + ":" + s
             : h + ":" + m + ":" + s
         }
-  }
+  },
+
+
 }
 </script>
+
+<style lang="scss">
+  .square {
+    width: 150px;
+    height: 100px;
+    transition: transform 100ms ease-out, border-radius 200ms ease-out;
+    border-radius: 10px 10px 10px 10px;
+    margin-right: 10px;
+  }
+
+  .underline-text{
+    width: 150px;
+    height: 20px;
+    overflow: hidden;
+    position: relative;
+    // box-shadow: inset 25px 0px 25px -25px rgba(0,0,0,0.45), inset -25px 0px 25px -25px rgba(0,0,0,0.45);
+  }
+
+  .underline-text .mover-1 {
+    position: absolute;
+    transform: translate3d(0, 0, 0);
+    animation: moveSlideshow 10s linear infinite;
+  }
+
+  @keyframes moveSlideshow {
+    from { transform: translate3d(150px, 0, 0); }
+    to { transform: translate3d(-100%, 0, 0); }
+  }
+
+  .square .cover {
+    width: 100%;
+    height: 100px;
+    background-size: cover!important;
+    background-position: center!important;
+  }
+
+  .square .text {
+    display: none;
+    background: #181818ad;
+    color: #fff;
+    width: 150px;
+    height: fit-content;
+    padding: 5px;
+    box-sizing: border-box;
+    transition: opacity 300ms ease-out, border-radius 200ms ease-out;
+    border-radius: 0 0 10px 10px;
+    font-size: 8px;
+    white-space: normal;
+  }
+
+  .square:hover {
+    border-radius: 10px;
+    transform: scale(1.5);
+    box-shadow: 0 0 2px #000a;
+    z-index: 999;
+  }
+
+  .square:hover .text {
+    display: inline-block;
+  }
+
+  .square.one .cover {
+    background: url(https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Arrestbygningen_ved_r%C3%A5d-_og_domhuset.jpg/320px-Arrestbygningen_ved_r%C3%A5d-_og_domhuset.jpg), skyblue;
+  }
+
+  .square.one:hover .cover {
+    background: url(https://media.giphy.com/media/lgcUUCXgC8mEo/giphy.gif), url(https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Arrestbygningen_ved_r%C3%A5d-_og_domhuset.jpg/320px-Arrestbygningen_ved_r%C3%A5d-_og_domhuset.jpg), skyblue;
+  }
+</style>
