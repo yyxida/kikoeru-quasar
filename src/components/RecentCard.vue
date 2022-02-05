@@ -138,13 +138,18 @@ export default {
       .then(response => {
         this.tree = response.data
         let queue = []
-        for (let i=0; i<this.tree.length; i+=1) {
-          if (this.tree[i].children != null) {
-            queue = queue.concat(this.tree[i].children)
-          } else {
-            queue.push(this.tree[i])
+        // children 还能有children
+        function makeQueue (tree) {
+          for (let i=0; i<tree.length; i+=1) {
+            if (tree[i].children != null) {
+              queue.concat(makeQueue(tree[i].children))
+            } else {
+              queue.push(tree[i])
+            }
           }
+          return queue
         }
+        queue = makeQueue(this.tree)
 
         // 插入playlist
         let hash = this.metadata.work_id + '/' + this.metadata.file_index
