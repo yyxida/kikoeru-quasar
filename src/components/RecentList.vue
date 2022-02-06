@@ -5,16 +5,17 @@
     </div>
 
     <div :class="`row justify-center q-mx-md`">
-      <q-infinite-scroll @load="onLoad" :offset="250" :disable="stopLoad" style="max-width: 1680px; overflow-x: scroll; padding: 25px 35px 25px 35px; margin-left: -15px;" class="col">
-
-        <div class="row q-col-gutter-x-md q-col-gutter-y-lg" style="white-space: nowrap; flex-wrap: nowrap; overflow-x: visible; overflow-y: visible; max-width: 100%">
-          <div class="" v-for="recentwork in recentworks" :key="recentwork.id"  style="display: inline-block">
+      <q-infinite-scroll
+      @load="onLoad"
+      :offset="250"
+      :disable="stopLoad"
+      style="max-width: 1680px; overflow-x: scroll; padding: 15px;"
+      class="col">
+        <div class="row q-col-gutter-x-md q-col-gutter-y-lg no-wrap">
+          <div class="col-md-2 col-xs-6 col-sm-4" v-for="recentwork in recentworks" :key="recentwork.id"  style="display: inline-block">
             <RecentCard :metadata="recentwork" :thumbnailMode="!detailMode" class="fit"/>
           </div>
-
-
         </div>
-
       </q-infinite-scroll>
     </div>
 
@@ -45,74 +46,6 @@ export default {
       stopLoad: false,
       recentworks: [],
       pageTitle: '',
-      seed: 7, // random sort
-      sortOption: {
-        label: '按照发售日期新到老的顺序',
-        order: 'release',
-        sort: 'desc'
-      },
-      options: [
-        {
-          label: '按照发售日期新到老的顺序',
-          order: 'release',
-          sort: 'desc'
-        },
-        {
-          label: '按照我的评价排序',
-          order: 'rating',
-          sort: 'desc'
-        },
-        {
-          label: '按照发售日期老到新的顺序',
-          order: 'release',
-          sort: 'asc'
-        },
-        {
-          label: '按照售出数量多到少的顺序',
-          order: 'dl_count',
-          sort: 'desc'
-        },
-        {
-          label: '按照价格便宜到贵的顺序',
-          order: 'price',
-          sort: 'asc'
-        },
-        {
-          label: '按照价格贵到便宜的顺序',
-          order: 'price',
-          sort: 'desc'
-        },
-        {
-          label: '按照评价高到低的顺序',
-          order: 'rate_average_2dp',
-          sort: 'desc'
-        },
-        {
-          label: '按照评论多到少的顺序',
-          order: 'review_count',
-          sort: 'desc'
-        },
-        {
-          label: '按照RJ号大到小的顺序',
-          order: 'id',
-          sort: 'desc'
-        },
-        {
-          label: '按照RJ号小到大的顺序',
-          order: 'id',
-          sort: 'asc'
-        },
-        {
-          label: '按照全年龄新作优先的顺序',
-          order: 'nsfw',
-          sort: 'asc'
-        },
-        {
-          label: '随机排序',
-          order: 'random',
-          sort: 'desc'
-        }
-      ]
     }
   },
 
@@ -246,10 +179,10 @@ export default {
   }
 
   .btn-right {
-    float: right; 
-    font-size:32px; 
-    position: relative; 
-    top: -75px; 
+    float: right;
+    font-size:32px;
+    position: relative;
+    top: -75px;
     background: rgba(71, 71, 71, 0.548);
     cursor: hand;
     z-index: 1000;

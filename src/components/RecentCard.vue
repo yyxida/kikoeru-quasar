@@ -5,7 +5,6 @@
       :src="coverUrl"
       :ratio="4/3"
       :img-class="imgClass"
-      style="max-width: 560px;"
       transition="fade"
       @mouseover="''"
       @mouseout="''"
@@ -174,7 +173,7 @@ export default {
           this.showErrNotif(error.message || error)
         }
       })
-  
+
     },
 
     formatSeconds (seconds) {
@@ -202,16 +201,17 @@ export default {
 
 <style lang="scss">
   .square {
-    width: 150px;
-    height: 100px;
+    // width: 150px;
+    // height: 100px;
     transition: transform 100ms ease-out, border-radius 200ms ease-out;
     border-radius: 10px 10px 10px 10px;
     margin-right: 10px;
+    box-shadow: 0 1px 5px rgba(128, 128, 128, 0.246), 0 2px 2px rgba(128, 128, 128, 0.102), 0 3px 1px -2px rgba(128, 128, 128, 0.116);
   }
 
   .underline-text{
-    width: 150px;
-    height: 20px;
+    // width: 150px;
+    // height: 20px;
     overflow: hidden;
     position: relative;
     // box-shadow: inset 25px 0px 25px -25px rgba(0,0,0,0.45), inset -25px 0px 25px -25px rgba(0,0,0,0.45);
@@ -239,7 +239,6 @@ export default {
     display: none;
     background: #181818ad;
     color: #fff;
-    width: 150px;
     height: fit-content;
     padding: 5px;
     box-sizing: border-box;
@@ -251,7 +250,7 @@ export default {
 
   .square:hover {
     border-radius: 10px;
-    transform: scale(1.5);
+    transform: scale(1.1);
     box-shadow: 0 0 2px #000a;
     z-index: 999;
   }
