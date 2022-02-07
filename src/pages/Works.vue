@@ -2,7 +2,6 @@
   <div>
     <RecentList />
 
-
     <div class="text-h5 text-weight-regular q-ma-md">
       {{pageTitle}}
       <span v-show="pagination.totalCount">
