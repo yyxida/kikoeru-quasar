@@ -1,6 +1,5 @@
 <template>
-  <div >
-    <!-- <router-link :to="`/work/${metadata.work_id}`"> -->
+  <div>
     <q-img
       :src="coverUrl"
       :ratio="4/3"
@@ -25,12 +24,13 @@
         {{metadata.file_name}}
       </div>
     </q-img>
-    <!-- </router-link> -->
+
     <div class="underline-text">
       <span class="mover-1">
         {{metadata.file_name}}
       </span>
     </div>
+
   </div>
 </template>
 
@@ -50,30 +50,15 @@ export default {
     metadata: {
       type: Object,
       required: true
-    },
-    thumbnailMode: {
-      type: Boolean,
-      default: false
     }
   },
 
   data () {
     return {
-      rating: 0,
-      userMarked: false,
-      showTags: true
     }
   },
 
   computed: {
-    sortedRatings: function() {
-      function compare(a, b) {
-        return (a.review_point > b.review_point) ? -1 : 1;
-      }
-
-      return this.metadata.rate_count_detail.slice().sort(compare);
-    },
-
       imgClass () {
       if (this.$q.platform.is.mobile) {
         // 在移动设备上图片直接显示
@@ -95,39 +80,6 @@ export default {
       return this.metadata.work_id ? `/api/cover/${this.metadata.work_id}?token=${token}` : ""
     },
 
-    rjcode () {
-      return (`000000${this.metadata.work_id}`).slice(-6)
-    },
-  },
-
-  // TODO: Refactor with Vuex?
-  mounted() {
-    if (this.metadata.userRating) {
-      this.userMarked = true;
-      this.rating = this.metadata.userRating;
-    } else {
-      this.userMarked = false;
-      this.rating = this.metadata.rate_average_2dp || 0;
-    }
-
-    // 极个别作品没有标签
-    if (this.metadata.tags && this.metadata.tags[0].name === null) {
-      this.showTags = false;
-    }
-  },
-
-  watch: {
-    rating (newRating, oldRating) {
-      if (oldRating) {
-        const submitPayload = {
-          'user_name': this.$store.state.User.name, // 用户名不会被后端使用
-          'work_id': this.metadata.id,
-          'rating': newRating
-        };
-        this.userMarked = true;
-        this.submitRating(submitPayload);
-      }
-    }
   },
 
   methods: {
@@ -152,11 +104,6 @@ export default {
 
         // 插入playlist
         let hash = this.metadata.work_id + '/' + this.metadata.file_index
-
-        console.log(queue)
-        console.log(queue.concat())
-        console.log(hash)
-        console.log(queue.findIndex(file => file.hash === hash))
 
         this.$store.commit('AudioPlayer/SET_QUEUE', {
         queue: queue.concat(),

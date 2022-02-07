@@ -13,7 +13,7 @@
       class="col">
         <div class="row q-col-gutter-x-md q-col-gutter-y-lg no-wrap">
           <div class="col-md-2 col-xs-6 col-sm-4" v-for="recentwork in recentworks" :key="recentwork.id"  style="display: inline-block">
-            <RecentCard :metadata="recentwork" :thumbnailMode="!detailMode" class="fit"/>
+            <RecentCard :metadata="recentwork" class="fit"/>
           </div>
         </div>
       </q-infinite-scroll>
@@ -40,9 +40,6 @@ export default {
 
   data () {
     return {
-      listMode: false,
-      showLabel: true,
-      detailMode: true,
       stopLoad: false,
       recentworks: [],
       pageTitle: '',
@@ -51,43 +48,6 @@ export default {
 
   created () {
     this.refreshPageTitle();
-    this.seed = Math.floor(Math.random() * 100);
-  },
-
-  mounted() {
-    if (localStorage.sortOption) {
-      try {
-        this.sortOption = JSON.parse(localStorage.sortOption);
-      } catch {
-        localStorage.removeItem('sortOption');
-      }
-    }
-    if (localStorage.showLabel) {
-      this.showLabel = (localStorage.showLabel === 'true');
-    }
-    if (localStorage.listMode) {
-      this.listMode = (localStorage.listMode === 'true');
-    }
-    if (localStorage.detailMode) {
-      this.detailMode = (localStorage.detailMode === 'true');
-    }
-  },
-
-  computed: {
-    url () {
-      const query = this.$route.query
-      if (query.circleId) {
-        return `/api/circles/${this.$route.query.circleId}/works`
-      } else if (query.tagId) {
-        return `/api/tags/${this.$route.query.tagId}/works`
-      } else if (query.vaId) {
-        return `/api/vas/${this.$route.query.vaId}/works`
-      } else if (query.keyword) {
-        return `/api/search/${query.keyword}`
-      } else {
-        return '/api/works'
-      }
-    }
   },
 
   // keep-alive hooks
@@ -99,30 +59,6 @@ export default {
 
   deactivated () {
     this.stopLoad = true
-  },
-
-  watch: {
-    url () {
-      this.reset()
-    },
-
-    sortOption (newSortOptionSetting) {
-      localStorage.sortOption = JSON.stringify(newSortOptionSetting);
-      this.seed = Math.floor(Math.random() * 100);
-      this.reset();
-    },
-
-    showLabel (newLabelSetting) {
-      localStorage.showLabel = newLabelSetting;
-    },
-
-    listMode (newListModeSetting) {
-      localStorage.listMode = newListModeSetting;
-    },
-
-    detailMode(newModeSetting) {
-      localStorage.detailMode = newModeSetting;
-    },
   },
 
   methods: {
