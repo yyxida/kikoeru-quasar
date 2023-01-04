@@ -1,42 +1,55 @@
-# This Dockerfile builds SPA and PWA artifacts and starts an Nginx if you run it in standalone mode
-# The Nginx is supposed to serve the following static assets:
-# /var/www for SPA and PWA
-# /storage at example.com/media/stream and example.com/media/download (if offload is enabled)
-# /covers for cover images (if offload is enabled)
-# Nginx should also be configured to reverse proxy to the backend at /api
-# Please refer to docs/nginx for examples
+# This dockerfile generates a single-container application
+# It copies build artifacts the from front-end image
+# If you want to separate the front-end from the back-end, it should work as well
+
+FROM node:14-alpine as build-dep
+
+# Create app directory
+WORKDIR /usr/src/kikoeru
+
+RUN apk update && apk add python3 make gcc g++ 
+
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# where available (npm@5+)
+COPY package*.json ./
+RUN npm ci --only=production
 
 # Build SPA and PWA
-FROM node:14 as build-stage
+FROM node:14 as build-frontend
 WORKDIR /frontend
 # @quasar/app v1 requires node-ass, which takes 30 minutes to compile libsass in CI for arm64 and armv7
 # So I prebuilt the binaries for arm64 and armv7
 # @quasar/app v2 no longer uses this deprecated package, so this line will be removed in the future
 ENV SASS_BINARY_SITE="https://github.com/umonaca/node-sass/releases/download"
 RUN npm install -g @quasar/cli
-COPY package*.json ./
+ARG FRONTEND_VERSION="history-release"
+# Workaround docker cache
+# https://stackoverflow.com/questions/36996046/how-to-prevent-dockerfile-caching-git-clone
+ADD https://api.github.com/repos/hanaonnao/kikoeru-quasar/git/refs/heads/history-release /tmp/version.json
+RUN git clone -b ${FRONTEND_VERSION} https://github.com/hanaonnao/kikoeru-quasar.git .
 RUN npm ci
-COPY . .
 RUN quasar build && quasar build -m pwa
 
-# We only need the build artifact
-FROM nginx:mainline-alpine
+# Final stage
+FROM node:14-alpine
+ENV IS_DOCKER=true
+WORKDIR /usr/src/kikoeru
 
-# FRONTEND_TYPE can be spa or pwa
-ARG FRONTEND_TYPE=pwa
-WORKDIR /var/www
-COPY --from=build-stage /frontend/dist/${FRONTEND_TYPE} /var/www
+# Copy build artifacts
+COPY --from=build-dep /usr/src/kikoeru /usr/src/kikoeru
+ARG FRONTEND_TYPE="pwa"
+COPY --from=build-frontend /frontend/dist/${FRONTEND_TYPE} /usr/src/kikoeru/dist
 
-# Mount your own Nginx config
-RUN rm -rf /etc/nginx/conf.d/*
-VOLUME [ "/etc/nginx/conf.d" ]
-EXPOSE 80
+# Bundle app source
+COPY . .
 
-# If you are using Let's Encrypt
-VOLUME [ "/etc/letsencrypt" ]
-EXPOSE 443
+# Tini
+RUN apk add --no-cache tini
+ENTRYPOINT ["/sbin/tini", "--"]
 
-# Mount offload paths for media files and covers
-VOLUME [ "/storage", "/covers" ]
+# 持久化
+VOLUME [ "/usr/src/kikoeru/sqlite", "/usr/src/kikoeru/config", "/usr/src/kikoeru/covers"]
 
-# Note: ENTRYPOINT and CMD is provided by the nginx base image
+EXPOSE 8888
+CMD [ "node", "app.js" ]
